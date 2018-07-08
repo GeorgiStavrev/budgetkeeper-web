@@ -1,50 +1,90 @@
-// The types of actions that you can dispatch to modify the state of the store
 export const types = {
     ADD: "ADD",
-    REMOVE: "REMOVE"
-  };
-  
-  // Helper functions to dispatch actions, optionally with payloads
-  export const actionCreators = {
-    add: item => {
-      return { type: types.ADD, payload: item };
+    REMOVE: "REMOVE",
+    COMPLETE: "COMPLETE",
+    SWITCH_OPTION: "SWITCH_OPTION",
+    SHOW_ALL: "SHOW_ALL"
+}
+
+export const actionCreators = {
+    add: (text) => {
+        const newItem = { text: text, important: false, completed: false };
+        return { type: types.ADD, payload: newItem };
     },
     remove: index => {
-      return { type: types.REMOVE, payload: index };
+        return { type: types.REMOVE, payload: index };
+    },
+    complete: index => {
+        return { type: types.COMPLETE, payload: index };
+    },
+    switchOption: index => {
+        return { type: types.SWITCH_OPTION, payload: index };
+    },
+    showAll: () => {
+        return { type: types.SHOW_ALL };
     }
-  };
-  
-  // Initial state of the store
-  const initialState = {
-    todos: ["Click to remove", "Learn React", "Write Code", "Ship App"]
-  };
-  
-  // Function to handle actions and update the state of the store.
-  // Notes:
-  // - The reducer must return a new state object. It must never modify
-  //   the state object. State objects should be treated as immutable.
-  // - We set \`state\` to our \`initialState\` by default. Redux will
-  //   call reducer() with no state on startup, and we are expected to
-  //   return the initial state of the app in this case.
-  export const reducer = (state = initialState, action) => {
-    const { todos } = state;
-    const { type, payload } = action;
-  
+};
+
+const initialState = {
+    showAll: false,
+    todos: [
+        { text:"Item1", important: false, completed: false, id: 0 },
+        { text:"Item2", important:false, completed: false, id: 1 },
+        { text:"Item3", important: false, completed: false, id: 2 }],
+    nextId: 3
+};
+
+export const reducer = (state = initialState, action) => {
+    const { todos, showAll, nextId } = state
+    const { type, payload } = action
+
     switch (type) {
-      case types.ADD: {
-        return {
-          ...state,
-          todos: [payload, ...todos]
-        };
-      }
-      case types.REMOVE: {
-        return {
-          ...state,
-          todos: todos.filter((todo, i) => i !== payload)
-        };
-      }
+        case types.ADD: {
+            payload.id = nextId
+            return {
+                ...state,
+                todos: [payload, ...todos],
+                nextId: nextId + 1
+            };
+        }
+        case types.REMOVE: {
+            return {
+                ...state,
+                todos: todos.filter((item, index) => item.id !== payload)
+            };
+        }
+        case types.SWITCH_OPTION: {
+            return {
+                ...state,
+                todos: todos.map((item, index) => {
+                    if (item.id === payload) {
+                        item.important = !item.important;
+                    }
+
+                    return item;
+                })
+            }
+        }
+        case types.COMPLETE: {
+            return {
+                ...state,
+                todos: todos.map((item, index) => {
+                    if (item.id === payload) {
+                        item.completed = !item.completed;
+                    }
+
+                    return item;
+                })
+            }
+        }
+        case types.SHOW_ALL: {
+            return {
+                ...state,
+                showAll: !showAll,
+                todos: todos
+            }
+        }
     }
-  
+
     return state;
-  };
-  
+};
