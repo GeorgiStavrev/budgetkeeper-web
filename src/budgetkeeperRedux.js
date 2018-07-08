@@ -3,9 +3,13 @@ export const types = {
     REMOVE: "REMOVE",
     COMPLETE: "COMPLETE",
     SWITCH_OPTION: "SWITCH_OPTION",
-    SHOW_ALL: "SHOW_ALL"
+    SHOW_ALL: "SHOW_ALL",
+    REQUEST_EXPENSES: "REQUEST_EXPENSES",
+    RECEIVED_EXPENSES: "RECEIVED_EXPENSES",
+    FETCH_MONTHLY_EXPENSES: "FETCH_MONTHLY_EXPENSES"
 }
 
+// ACTIONS
 export const actionCreators = {
     add: (text) => {
         const newItem = { text: text, important: false, completed: false };
@@ -22,20 +26,38 @@ export const actionCreators = {
     },
     showAll: () => {
         return { type: types.SHOW_ALL };
+    },
+    requestExpenses: () => {
+        return { type: types.REQUEST_EXPENSES };
+    },
+    receivedExpenses: (json) => {
+        return { type: types.RECEIVED_EXPENSES, json: json };
+    },
+    fetchMonthlyExpenses: () => {
+        return function(dispatch) {
+            dispatch({ type: types.REQUEST_EXPENSES })
+            return fetch(`http://localhost:8080/expenses/monthly`)
+            .then(
+                response => response.json(),
+                error => console.log('An error occurred.', error),
+            )
+            .then((json) => {
+                dispatch({ type: types.RECEIVED_EXPENSES, json: json });
+            })
+        }
     }
 };
 
 const initialState = {
     showAll: false,
-    todos: [
-        { text:"Item1", important: false, completed: false, id: 0 },
-        { text:"Item2", important:false, completed: false, id: 1 },
-        { text:"Item3", important: false, completed: false, id: 2 }],
-    nextId: 3
+    expenses: [],
+    nextId: 3,
+    loading: false
 };
 
+// REDUCERS
 export const reducer = (state = initialState, action) => {
-    const { todos, showAll, nextId } = state
+    const { expenses, showAll, nextId } = state
     const { type, payload } = action
 
     switch (type) {
@@ -43,20 +65,20 @@ export const reducer = (state = initialState, action) => {
             payload.id = nextId
             return {
                 ...state,
-                todos: [payload, ...todos],
+                expenses: [payload, ...expenses],
                 nextId: nextId + 1
             };
         }
         case types.REMOVE: {
             return {
                 ...state,
-                todos: todos.filter((item, index) => item.id !== payload)
+                expenses: expenses.filter((item, index) => item.id !== payload)
             };
         }
         case types.SWITCH_OPTION: {
             return {
                 ...state,
-                todos: todos.map((item, index) => {
+                expenses: expenses.map((item, index) => {
                     if (item.id === payload) {
                         item.important = !item.important;
                     }
@@ -68,7 +90,7 @@ export const reducer = (state = initialState, action) => {
         case types.COMPLETE: {
             return {
                 ...state,
-                todos: todos.map((item, index) => {
+                expenses: expenses.map((item, index) => {
                     if (item.id === payload) {
                         item.completed = !item.completed;
                     }
@@ -81,7 +103,20 @@ export const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 showAll: !showAll,
-                todos: todos
+                expenses: expenses
+            }
+        }
+        case types.REQUEST_EXPENSES: {
+            return {
+                ...state,
+                loading: true
+            }
+        }
+        case types.RECEIVED_EXPENSES: {
+            return {
+                ...state,
+                loading: false,
+                expenses: action.json
             }
         }
     }

@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux'
-import Title from './components/Title'
-import Input from './components/Input'
-import ExpensesList from './components/ExpensesList'
-import { actionCreators } from './budgetkeeperRedux';
+import Title from '../components/Title'
+import Input from '../components/Input'
+import ExpensesList from './ExpensesList'
+import { actionCreators } from '../budgetkeeperRedux';
 
 const mapStateToProps = (state) => ({
   showAll: state.showAll,
-  todos: state.todos
+  expenses: state.expenses
 })
 
 class App extends React.Component {
@@ -36,19 +36,26 @@ class App extends React.Component {
     dispatch(actionCreators.showAll())
   }
 
+  componentWillMount() {
+    const { dispatch } = this.props
+    dispatch(actionCreators.fetchMonthlyExpenses())
+  }
+
   render() {
-    let { todos, showAll } = this.props
-    todos = todos.filter(item => item && !item.completed || showAll)
+    let { expenses, showAll, loading } = this.props
+    if (!expenses) {
+      expenses = []
+    }
     return (
       <div style={styles.container}>
         <Title onClickButton={this.onShowAll} allShown={showAll}>
-          To-Do List
+          {loading ? "Loading..." : "Monthly expenses" }
         </Title>
         <Input 
           placeholder={'Type a new expense'}
           onSubmitEditing={this.onAddTodo}/>
         <ExpensesList
-          items={todos} 
+          items={expenses} 
           onClickItem={this.onCompleteTodo}
           onClickItemOption1={this.onRemoveTodo}
           onClickItemOption2={this.onSwitchOption}/>

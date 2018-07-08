@@ -3,10 +3,11 @@ import '../App.css'
 
 export default class ExpensesListItem extends React.Component {
     render() {
+        console.log('item')
         const { item, onClick, onClickOption1, onClickOption2 } = this.props
         return (    
             <div style={styles.item}>
-                <div style={item.completed ? styles.col1completed : styles.col1} onClick={() => onClick(item.id)}>{item.text}</div>
+                <div style={item.completed ? styles.col1completed : styles.col1} onClick={() => onClick(item.id)}>{item.name}</div>
                 <div style={styles.col2} onClick={() => onClickOption1(item.id)}>🗑</div>
                 <div style={styles.col3} onClick={() => onClickOption2(item.id)}>{item.important ? "❤️️" : "" }</div>
             </div>

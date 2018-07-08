@@ -1,5 +1,5 @@
 import React from 'react'
-import ListItem from './ExpensesListItem'
+import ListItem from '../components/ExpensesListItem'
 import '../App.css'
 
 export default class ExpensesList extends React.Component {
@@ -8,7 +8,12 @@ export default class ExpensesList extends React.Component {
         return (
             <div style={styles.container}>
                 {items.map(item => 
-                <ListItem key={item.id} item={item} onClick={onClickItem} onClickOption1={onClickItemOption1} onClickOption2={onClickItemOption2} /> )}
+                <ListItem 
+                    key={item.id}
+                    item={item} 
+                    onClick={onClickItem}
+                    onClickOption1={onClickItemOption1}
+                    onClickOption2={onClickItemOption2} /> )}
             </div>
         );
     };
